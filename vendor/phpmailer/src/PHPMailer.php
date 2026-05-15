@@ -85,7 +85,6 @@ class PHPMailer
 
     private function smtpSend()
     {
-        // Simple SMTP implementation for Gmail
         $host = $this->Host;
         $port = $this->Port;
 
@@ -102,16 +101,13 @@ class PHPMailer
             return false;
         }
 
-        // Read greeting
         fgets($fp, 1024);
 
-        // EHLO
         fputs($fp, "EHLO localhost\r\n");
         while ($line = fgets($fp, 1024)) {
             if (substr($line, 3, 1) == ' ') break;
         }
 
-        // Start TLS if needed
         if ($this->SMTPSecure == 'tls') {
             fputs($fp, "STARTTLS\r\n");
             $response = fgets($fp, 1024);
@@ -120,16 +116,13 @@ class PHPMailer
                 fclose($fp);
                 return false;
             }
-            // Upgrade to SSL
             stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
-            // Re-EHLO
             fputs($fp, "EHLO localhost\r\n");
             while ($line = fgets($fp, 1024)) {
                 if (substr($line, 3, 1) == ' ') break;
             }
         }
 
-        // Auth
         if ($this->SMTPAuth) {
             fputs($fp, "AUTH LOGIN\r\n");
             $response = fgets($fp, 1024);
@@ -154,7 +147,6 @@ class PHPMailer
             }
         }
 
-        // From
         fputs($fp, "MAIL FROM: <{$this->From}>\r\n");
         $response = fgets($fp, 1024);
         if (substr($response, 0, 3) != '250') {
@@ -163,7 +155,6 @@ class PHPMailer
             return false;
         }
 
-        // To
         foreach ($this->to as $to) {
             fputs($fp, "RCPT TO: <{$to['address']}>\r\n");
             $response = fgets($fp, 1024);
@@ -174,7 +165,6 @@ class PHPMailer
             }
         }
 
-        // Data
         fputs($fp, "DATA\r\n");
         $response = fgets($fp, 1024);
         if (substr($response, 0, 3) != '354') {
@@ -183,7 +173,6 @@ class PHPMailer
             return false;
         }
 
-        // Headers and body
         $headers = "From: {$this->FromName} <{$this->From}>\r\n";
         $headers .= "To: {$this->to[0]['name']} <{$this->to[0]['address']}>\r\n";
         $headers .= "Subject: {$this->Subject}\r\n";
@@ -200,7 +189,6 @@ class PHPMailer
             return false;
         }
 
-        // Quit
         fputs($fp, "QUIT\r\n");
         fclose($fp);
 
